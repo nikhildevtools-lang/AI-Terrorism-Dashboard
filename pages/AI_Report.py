@@ -1,180 +1,43 @@
+# pages/AI_Report.py
 import streamlit as st
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-
 from utils.helper import format_number, get_threat_level
 from utils.data_loader import get_summary_stats
 
+def show(conn):
+    if conn is None: return
 
-def show(df: pd.DataFrame):
+    st.markdown('''<div class="glass-card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;"><h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;"><span class="gradient-text">🧠 Intelligence Report</span></h1><p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Automatically generated strategic intelligence report based on Global Terrorism Database analysis.</p></div>''', unsafe_allow_html=True)
 
-    if df.empty:
-        st.warning("No data available.")
-        return
+    with st.spinner("Generating intelligence report..."):
+        stats = get_summary_stats(conn)
+        yearly = conn.execute("SELECT year, COUNT(*) as count FROM gtd GROUP BY year ORDER BY year").df()
+        from sklearn.linear_model import LinearRegression
+        X = yearly[["year"]].values
+        y = yearly["count"].values
+        model = LinearRegression().fit(X, y)
+        trend_direction = model.coef_[0]
+        r2 = model.score(X, y)
+        threat_level, threat_color = get_threat_level(stats["total_fatalities"], stats["total_incidents"])
+        deadly_attacks = conn.execute("SELECT year, country, city, attack_type, group_name, fatalities, injuries FROM gtd ORDER BY fatalities DESC NULLS LAST LIMIT 5").df()
+        
+        recent_start = int(stats["year_range"].split(" - ")[1]) if " - " in stats["year_range"] else 1970
+        recent_res = conn.execute(f"SELECT group_name FROM gtd WHERE year >= {recent_start} GROUP BY group_name ORDER BY COUNT(*) DESC LIMIT 1").fetchone()
+        recent_top_group = recent_res[0] if recent_res else "Unknown"
 
-    stats = get_summary_stats(df)
-
-    year_values = pd.to_numeric(df["year"], errors="coerce")
-    valid_years = year_values.dropna()
-
-    trend_direction = 0
-    r2 = 0
-
-    if len(valid_years) > 1:
-        yearly = (
-            df.assign(year=year_values)
-            .dropna(subset=["year"])
-            .groupby("year")
-            .size()
-            .reset_index(name="count")
-        )
-
-        if len(yearly) > 1:
-            X = yearly[["year"]]
-            y = yearly["count"]
-
-            model = LinearRegression()
-            model.fit(X, y)
-
-            trend_direction = model.coef_[0]
-            r2 = model.score(X, y)
-
-    threat_level, threat_color = get_threat_level(
-        stats["total_fatalities"],
-        stats["total_incidents"],
-    )
-
-    st.title("🧠 Global Terrorism Intelligence Report")
-    st.caption("Automatically generated from the Global Terrorism Database")
-
-    st.divider()
-
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric(
-        "Threat Level",
-        threat_level,
-    )
-
-    c2.metric(
-        "Trend",
-        "Increasing" if trend_direction > 0 else "Decreasing",
-    )
-
-    c3.metric(
-        "Model Reliability",
-        f"{r2*100:.1f}%"
-    )
-
-    st.divider()
-
-    st.subheader("Executive Summary")
-
-    st.write(
-        f"""
-A total of **{format_number(stats["total_incidents"])}** incidents were recorded
-across **{stats["total_countries"]}** countries.
-
-The database reports:
-
-- **{format_number(stats["total_fatalities"])} fatalities**
-- **{format_number(stats["total_injuries"])} injuries**
-- **{format_number(stats["total_groups"])} terrorist organizations**
-- **{stats["total_attack_types"]} attack types**
-- **{stats["total_weapons"]} weapon types**
-"""
-    )
-
-    st.divider()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader("Geographic Analysis")
-
-        st.info(
-            f"""
-Most affected country:
-
-**{stats["most_affected_country"]}**
-"""
-        )
-
-    with col2:
-        st.subheader("Groups")
-
-        st.info(
-            f"""
-Most active group:
-
-**{stats["most_active_group"]}**
-"""
-        )
-
-    st.divider()
-
-    st.subheader("Attack Methodology")
-
-    c1, c2 = st.columns(2)
-
-    c1.metric(
-        "Most Common Attack",
-        stats["most_common_attack"],
-    )
-
-    c2.metric(
-        "Most Common Weapon",
-        stats["most_common_weapon"],
-    )
-
-    st.divider()
-
-    st.subheader("Deadliest Incidents")
-
-    if "fatalities" in df.columns:
-
-        cols = [
-            "year",
-            "country",
-            "city",
-            "attack_type",
-            "group_name",
-            "fatalities",
-            "injuries",
-        ]
-
-        cols = [c for c in cols if c in df.columns]
-
-        top = (
-            df.nlargest(10, "fatalities")[cols]
-            .reset_index(drop=True)
-        )
-
-        st.dataframe(
-            top,
-            use_container_width=True,
-            hide_index=True,
-        )
-
-    st.divider()
-
-    st.subheader("Recommendations")
-
-    recommendations = [
-        "Increase intelligence sharing between countries.",
-        "Focus surveillance on high-risk regions.",
-        "Improve emergency response capabilities.",
-        "Strengthen protection of critical infrastructure.",
-        "Use predictive analytics for resource allocation.",
-    ]
-
-    for r in recommendations:
-        st.success(r)
-
-    st.divider()
-
-    st.download_button(
-        "📥 Download Report",
-        data=str(stats),
-        file_name="terrorism_report.txt",
-    )
+    st.markdown(f'''
+        <div class="report-container">
+            <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(124, 58, 237, 0.15);">
+                <div style="font-size: 0.7rem; color: #64748b; letter-spacing: 0.15em; text-transform: uppercase;">CLASSIFIED // INTELLIGENCE REPORT</div>
+                <h1 style="font-size: 1.8rem; margin: 0.5rem 0;">Global Terrorism Intelligence Report</h1>
+                <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; font-size: 0.85rem; color: #94a3b8;">
+                    <span>Period: {stats["year_range"]}</span>
+                </div>
+            </div>
+            <h2>1. Executive Summary</h2>
+            <p>Total of <b style="color: #e2e8f0;">{format_number(stats["total_incidents"])}</b> terrorist incidents.</p>
+            <h2>5. Deadliest Incidents</h2>
+    ''', unsafe_allow_html=True)
+    
+    for _, row in deadly_attacks.iterrows():
+        st.markdown(f"<div style='padding: 0.6rem 1rem; margin: 0.3rem 0; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444;'><b>{int(row['year'])}</b> - {row['country']}, {row.get('city', 'Unknown')} - <span style='color: #ef4444; font-weight: 700;'>{int(row['fatalities'])} fatalities</span></div>", unsafe_allow_html=True)

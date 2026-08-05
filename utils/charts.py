@@ -6,7 +6,7 @@ import numpy as np
 
 THEME = {
     "bg": "#0a0a1a",
-    "card": "#14142b",
+    "card": "rgba(20, 20, 43, 0.8)",
     "card_hover": "#1a1a3e",
     "accent": "#7c3aed",
     "accent_light": "#a78bfa",
@@ -16,7 +16,7 @@ THEME = {
     "info": "#3b82f6",
     "text": "#e2e8f0",
     "text_muted": "#94a3b8",
-    "grid": "#1e1e3a",
+    "grid": "rgba(255, 255, 255, 0.08)",
     "gradient_start": "#7c3aed",
     "gradient_end": "#3b82f6",
 }
@@ -27,12 +27,13 @@ def apply_theme(fig: go.Figure) -> go.Figure:
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, -apple-system, sans-serif", color=THEME["text"]),
+        title=dict(font=dict(family="Outfit, sans-serif", size=18, color=THEME["text"])),
         margin=dict(l=20, r=20, t=40, b=20),
         hovermode="closest",
         hoverlabel=dict(
             bgcolor=THEME["card"],
-            font_size=12,
-            font_family="Inter, sans-serif",
+            font_size=13,
+            font_family="Outfit, sans-serif",
             bordercolor=THEME["accent"],
         ),
     )

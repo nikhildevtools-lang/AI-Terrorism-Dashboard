@@ -1,3 +1,4 @@
+# utils/preprocessing.py
 import pandas as pd
 import numpy as np
 import streamlit as st
@@ -7,8 +8,8 @@ from sklearn.preprocessing import LabelEncoder
 import joblib
 from pathlib import Path
 
-
-def prepare_prediction_data(df: pd.DataFrame):
+def prepare_prediction_data(conn):
+    df = conn.execute("SELECT country, region, weapon_type, target_type, attack_type, group_name, success, suicide, fatalities, injuries, multiple_attacks, property_damage FROM gtd").df()
     feature_cols = []
     encoders = {}
 
@@ -30,39 +31,19 @@ def prepare_prediction_data(df: pd.DataFrame):
             encoders[col] = le
             feature_cols.append(col)
 
-    if "success" in df.columns:
-        X["success"] = df["success"].fillna(0).astype(int)
-        feature_cols.append("success")
-
-    if "suicide" in df.columns:
-        X["suicide"] = df["suicide"].fillna(0).astype(int)
-        feature_cols.append("suicide")
-
-    if "fatalities" in df.columns:
-        X["fatalities"] = df["fatalities"].fillna(0).astype(int)
-        feature_cols.append("fatalities")
-
-    if "injuries" in df.columns:
-        X["injuries"] = df["injuries"].fillna(0).astype(int)
-        feature_cols.append("injuries")
-
-    if "multiple_attacks" in df.columns:
-        X["multiple_attacks"] = df["multiple_attacks"].fillna(0).astype(int)
-        feature_cols.append("multiple_attacks")
-
-    if "property_damage" in df.columns:
-        X["property_damage"] = df["property_damage"].fillna(0).astype(int)
-        feature_cols.append("property_damage")
+    for c in ["success", "suicide", "fatalities", "injuries", "multiple_attacks", "property_damage"]:
+        if c in df.columns:
+            X[c] = df[c].fillna(0).astype(int)
+            feature_cols.append(c)
 
     y = (df["fatalities"] > 0).astype(int) if "fatalities" in df.columns else pd.Series(np.zeros(len(df)))
 
     X = X.fillna(0)
     return X, y, feature_cols, encoders
 
-
 @st.cache_data
-def train_prediction_model(df: pd.DataFrame):
-    X, y, feature_cols, encoders = prepare_prediction_data(df)
+def train_prediction_model(_conn):
+    X, y, feature_cols, encoders = prepare_prediction_data(_conn)
     if X.shape[1] == 0:
         return None, None, None, None
 
@@ -82,24 +63,12 @@ def train_prediction_model(df: pd.DataFrame):
     accuracy = model.score(X_test, y_test)
     return model, encoders, feature_cols, accuracy
 
-
 def predict_attack(
-    model,
-    encoders: dict,
-    feature_cols: list,
-    country: str,
-    region: str,
-    weapon: str,
-    target: str,
-    attack_type: str,
-    group: str,
-    success: int,
-    suicide: int,
-    fatalities: int,
-    injuries: int,
+    model, encoders: dict, feature_cols: list, country: str, region: str,
+    weapon: str, target: str, attack_type: str, group: str, success: int,
+    suicide: int, fatalities: int, injuries: int,
 ):
     input_data = {}
-
     country_enc = encoders.get("country")
     region_enc = encoders.get("region")
     weapon_enc = encoders.get("weapon_type")
@@ -120,34 +89,17 @@ def predict_attack(
     if group_enc and "group_name" in feature_cols:
         input_data["group_name"] = group_enc.transform([group])[0] if group in group_enc.classes_ else -1
 
-    if "success" in feature_cols:
-        input_data["success"] = success
-    if "suicide" in feature_cols:
-        input_data["suicide"] = suicide
-    if "fatalities" in feature_cols:
-        input_data["fatalities"] = fatalities
-    if "injuries" in feature_cols:
-        input_data["injuries"] = injuries
+    for c, val in [("success", success), ("suicide", suicide), ("fatalities", fatalities), ("injuries", injuries)]:
+        if c in feature_cols:
+            input_data[c] = val
 
     for col in feature_cols:
         if col not in input_data:
             input_data[col] = 0
 
-    import pandas as pd
-    input_df = pd.DataFrame([input_data])
-    input_df = input_df[feature_cols]
+    input_df = pd.DataFrame([input_data])[feature_cols]
 
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0]
 
     return prediction, probability
-
-
-def save_model(model, encoders, feature_cols, path: str = "models/terrorism_model.pkl"):
-    Path("models").mkdir(exist_ok=True)
-    joblib.dump({"model": model, "encoders": encoders, "feature_cols": feature_cols}, path)
-
-
-def load_model(path: str = "models/terrorism_model.pkl"):
-    data = joblib.load(path)
-    return data["model"], data["encoders"], data["feature_cols"]

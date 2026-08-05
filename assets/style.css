@@ -1,5 +1,5 @@
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 :root {
     --bg: #080b10;
@@ -37,8 +37,9 @@
 }
 
 h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif !important;
     color: var(--text) !important;
-    font-weight: 750 !important;
+    font-weight: 700 !important;
 }
 
 p, span, div, li, label {
@@ -74,7 +75,8 @@ section[data-testid="stSidebar"] div {
 }
 
 .sidebar-title {
-    font-size: 1.08rem !important;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.15rem !important;
     font-weight: 800 !important;
     color: var(--text) !important;
     line-height: 1.25 !important;
@@ -134,8 +136,10 @@ section[data-testid="stSidebar"] div {
 }
 
 .home-hero h1 {
+    font-family: 'Outfit', sans-serif !important;
     color: #f8fafc !important;
-    font-size: clamp(2rem, 4.2vw, 4.6rem);
+    font-size: clamp(2.5rem, 4.5vw, 5rem);
+    font-weight: 800 !important;
     line-height: 1.02;
     margin: 0.55rem 0 0.9rem;
     max-width: 980px;
@@ -179,10 +183,12 @@ div[data-testid="stMetric"],
 .custom-card,
 .glass-card,
 .report-container {
-    background: linear-gradient(180deg, rgba(17, 24, 34, 0.96), rgba(12, 17, 25, 0.96)) !important;
-    border: 1px solid var(--line) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.22) !important;
+    background: rgba(17, 24, 34, 0.55) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25) !important;
 }
 
 .stat-card {
@@ -197,9 +203,9 @@ div[data-testid="stMetric"],
 .stat-card:hover,
 div[data-testid="stPlotlyChart"]:hover,
 .custom-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(56, 189, 248, 0.34) !important;
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.28) !important;
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.4) !important;
 }
 
 .stat-icon {
@@ -212,10 +218,11 @@ div[data-testid="stPlotlyChart"]:hover,
 }
 
 .stat-value {
+    font-family: 'Outfit', sans-serif !important;
     color: #f8fafc !important;
-    font-size: clamp(1.35rem, 1.7vw, 1.85rem) !important;
+    font-size: clamp(1.5rem, 2vw, 2.2rem) !important;
     line-height: 1.08 !important;
-    font-weight: 820 !important;
+    font-weight: 800 !important;
     margin-top: 0.6rem;
     white-space: nowrap;
 }
