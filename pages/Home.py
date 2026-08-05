@@ -323,15 +323,21 @@ def show(conn):
     with col1:
         st.html('<div class="custom-card animate-in delay-3">')
         yearly = conn.execute("SELECT year, COUNT(*) as count FROM gtd GROUP BY year ORDER BY year").df()
-        fig = create_line_chart(yearly, "year", "count", "Attacks by Year", THEME["accent"])
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if yearly is not None and not yearly.empty:
+            fig = create_line_chart(yearly, "year", "count", "Attacks by Year", THEME["accent"])
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Attacks by Year.")
         st.html("</div>")
 
     with col2:
         st.html('<div class="custom-card animate-in delay-4">')
         top_countries = conn.execute("SELECT country, COUNT(*) as count FROM gtd GROUP BY country ORDER BY count DESC LIMIT 10").df()
-        fig = create_bar_chart(top_countries, "country", "count", "Top 10 Affected Countries", THEME["danger"], orientation="h")
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if top_countries is not None and not top_countries.empty:
+            fig = create_bar_chart(top_countries, "country", "count", "Top 10 Affected Countries", THEME["danger"], orientation="h")
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Top Countries.")
         st.html("</div>")
 
     col1, col2 = st.columns(2)
@@ -339,15 +345,21 @@ def show(conn):
     with col1:
         st.html('<div class="custom-card animate-in delay-5">')
         attack_counts = conn.execute("SELECT attack_type, COUNT(*) as count FROM gtd GROUP BY attack_type ORDER BY count DESC LIMIT 8").df()
-        fig = create_pie_chart(attack_counts, "count", "attack_type", "Attack Type Distribution")
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if attack_counts is not None and not attack_counts.empty:
+            fig = create_pie_chart(attack_counts, "count", "attack_type", "Attack Type Distribution")
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Attack Types.")
         st.html("</div>")
 
     with col2:
         st.html('<div class="custom-card animate-in delay-6">')
         weapon_counts = conn.execute("SELECT weapon_type, COUNT(*) as count FROM gtd GROUP BY weapon_type ORDER BY count DESC LIMIT 8").df()
-        fig = create_pie_chart(weapon_counts, "count", "weapon_type", "Weapon Type Distribution")
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if weapon_counts is not None and not weapon_counts.empty:
+            fig = create_pie_chart(weapon_counts, "count", "weapon_type", "Weapon Type Distribution")
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Weapon Types.")
         st.html("</div>")
 
     st.html("<br>")
@@ -356,23 +368,32 @@ def show(conn):
     with col1:
         st.html('<div class="custom-card">')
         top_groups = conn.execute("SELECT group_name, COUNT(*) as count FROM gtd GROUP BY group_name ORDER BY count DESC LIMIT 10").df()
-        fig = create_bar_chart(top_groups, "group_name", "count", "Top 10 Terrorist Groups", THEME["warning"], orientation="h")
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if top_groups is not None and not top_groups.empty:
+            fig = create_bar_chart(top_groups, "group_name", "count", "Top 10 Terrorist Groups", THEME["warning"], orientation="h")
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Terrorist Groups.")
         st.html("</div>")
 
     with col2:
         st.html('<div class="custom-card">')
         heatmap_data = conn.execute("SELECT year, region, COUNT(*) as count FROM gtd GROUP BY year, region").df()
-        fig = create_heatmap(heatmap_data, "year", "region", "count", "Regional Activity Heatmap", height=450)
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        if heatmap_data is not None and not heatmap_data.empty:
+            fig = create_heatmap(heatmap_data, "year", "region", "count", "Regional Activity Heatmap", height=450)
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            st.info("No data available for Regional Heatmap.")
         st.html("</div>")
 
     st.html("<br>")
 
     st.html('<div class="custom-card">')
     treemap_data = conn.execute("SELECT region, country, group_name, COUNT(*) as count FROM gtd GROUP BY region, country, group_name ORDER BY count DESC LIMIT 100").df()
-    fig = create_treemap(treemap_data, ["region", "country", "group_name"], "count", "Global Terrorism Overview - Region → Country → Group")
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    if treemap_data is not None and not treemap_data.empty:
+        fig = create_treemap(treemap_data, ["region", "country", "group_name"], "count", "Global Terrorism Overview - Region → Country → Group")
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    else:
+        st.info("No data available for Global Overview.")
     st.html("</div>")
 
     st.html(

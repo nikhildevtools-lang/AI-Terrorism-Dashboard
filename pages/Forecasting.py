@@ -14,7 +14,7 @@ def show(conn):
         '''
         <div class="glass-card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;">
             <h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;">
-                <span class="gradient-text">📈 Forecasting</span>
+                <span class="gradient-text">Forecasting</span>
             </h1>
             <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">
                 Predict future terrorism trends using linear regression analysis on historical incident data.

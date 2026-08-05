@@ -7,7 +7,7 @@ from utils.data_loader import get_summary_stats
 def show(conn):
     if conn is None: return
 
-    st.markdown('''<div class="glass-card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;"><h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;"><span class="gradient-text">🧠 Intelligence Report</span></h1><p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Automatically generated strategic intelligence report based on Global Terrorism Database analysis.</p></div>''', unsafe_allow_html=True)
+    st.markdown('''<div class="glass-card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;"><h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;"><span class="gradient-text">Intelligence Report</span></h1><p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">Automatically generated strategic intelligence report based on Global Terrorism Database analysis.</p></div>''', unsafe_allow_html=True)
 
     with st.spinner("Generating intelligence report..."):
         stats = get_summary_stats(conn)

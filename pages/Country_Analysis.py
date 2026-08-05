@@ -10,17 +10,28 @@ def show(conn):
         st.warning("No data available.")
         return
 
-    st.markdown(
+    st.html(
         '''
         <div class="glass-card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;">
-            <h1 style="font-size: 2.2rem; margin-bottom: 0.3rem;">
-                <span class="gradient-text">🌎 Country Analysis</span>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.3rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="url(#globe-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <defs>
+                        <linearGradient id="globe-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a78bfa" />
+                            <stop offset="100%" stop-color="#3b82f6" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                    <path d="M2 12h20"></path>
+                </svg>
+                <span class="gradient-text">Country Analysis</span>
             </h1>
             <p style="color: #94a3b8; max-width: 600px; margin: 0 auto;">
                 Deep dive into terrorism activity by country with comprehensive analytics.
             </p>
         </div>
-        ''', unsafe_allow_html=True
+        '''
     )
 
     countries = get_country_list(conn)

@@ -3,6 +3,7 @@ import duckdb
 import streamlit as st
 from pathlib import Path
 import pandas as pd
+from utils.download_dataset import ensure_dataset
 
 @st.cache_resource
 def get_db_connection():
@@ -12,6 +13,7 @@ def get_db_connection():
     if not data_path.exists():
         st.error("Dataset not found. Please place 'globalterrorismdb_0718dist.csv' in the data/ directory.")
         return None
+    ensure_dataset()
 
     conn = duckdb.connect(':memory:')
     
